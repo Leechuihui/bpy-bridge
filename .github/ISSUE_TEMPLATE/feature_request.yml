@@ -1,0 +1,33 @@
+---
+name: Feature request
+about: Suggest a capability, or tell us what you are trying to do
+title: ""
+labels: enhancement
+assignees: ""
+---
+
+## What are you trying to do
+
+<!-- Describe the goal, not the API you have in mind. "I want to run 40 seed
+     variations without relaunching Blender" is more useful than
+     "add a batch() method". -->
+
+## Why the current approach does not work
+
+<!-- What have you tried? Was it slow, unreliable, or impossible? -->
+
+## Sketch of what you imagine
+
+<!-- Optional. A few lines of pretend client code are fine. -->
+
+```python
+```
+
+## Scope check
+
+<!-- The project is deliberately small. It is worth confirming up front that the
+     request fits: -->
+
+- [ ] This needs no new runtime dependency (both halves are dependency-free on purpose)
+- [ ] This does not require sandboxing / module allowlists (that is a different project)
+- [ ] This does not change the default bind address away from loopback

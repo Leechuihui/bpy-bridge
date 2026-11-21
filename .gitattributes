@@ -1,0 +1,16 @@
+# Normalise line endings so a Windows checkout does not rewrite every file.
+# Python and shell sources are LF everywhere; Markdown and YAML are LF too,
+# which keeps diffs readable across the three CI platforms.
+* text=auto eol=lf
+
+*.py   text eol=lf
+*.md   text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+LICENSE text eol=lf
+
+# Binary-ish files that should never be line-ending converted.
+*.png binary
+*.jpg binary
+*.blend binary

@@ -1,0 +1,60 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ["3.8", "3.10", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Run tests
+        run: python -m pytest -q
+
+      - name: Verify the server file is standalone
+        # The whole point of server.py is that it can be copied into Blender and
+        # exec()'d with no package around it. Importing it as a bare file, with
+        # no site-packages and no sibling modules, is the cheapest way to prove
+        # that claim stays true.
+        run: python tests/standalone_server_check.py
+
+      - name: End-to-end smoke test
+        # Two real processes: a bridge with a fake bpy, driven by the installed
+        # CLI. This is the step that catches packaging and exit-code regressions
+        # that unit tests structurally cannot see.
+        run: python tests/e2e_smoke.py
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile every module
+        run: python -m compileall -q bpy_bridge tests
+      - name: Check the CLI entry point responds
+        run: |
+          python -m pip install -e .
+          bpy-bridge --help > /dev/null
+          bpy-bridge token-path

@@ -1,0 +1,51 @@
+# Byte-compiled / caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Packaging
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+pip-wheel-metadata/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Project-local artefacts: the bridge writes its token to ~/.bpy-bridge by
+# default, but people override BPY_BRIDGE_HOME to somewhere inside the repo
+# while experimenting. Never commit a token.
+.bpy-bridge/
+token
+*.token
+
+# Blender scratch files
+*.blend1
+*.blend2

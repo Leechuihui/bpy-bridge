@@ -1,0 +1,52 @@
+---
+name: Bug report
+about: Something does not work as documented
+title: ""
+labels: bug
+assignees: ""
+---
+
+## What happened
+
+<!-- One or two sentences. The actual behaviour, not the expected one. -->
+
+## What you expected
+
+## Steps to reproduce
+
+1.
+2.
+3.
+
+## Environment
+
+<!-- The fields that actually matter for this project. Please fill them in;
+     "it doesn't work" without a Blender version cannot be diagnosed. -->
+
+- `bpy-bridge --version` / installed version:
+- Blender version (`bpy.app.version_string`):
+- OS and version:
+- Python version (client side):
+- Bridge started from: <!-- Python console / scripts/startup autostart / other -->
+
+## CLI output
+
+<!-- Paste the full output, including the exit code.
+     On POSIX:  bpy-bridge exec 'x' ; echo "exit=$?"
+     On Windows: bpy-bridge exec 'x' ; echo "exit=$LASTEXITCODE" -->
+
+```
+```
+
+## If this is a threading / freeze issue
+
+<!-- Blender's API is main-thread only. Freezes usually mean something touched
+     bpy from a socket thread. These details narrow it down fast. -->
+
+- Was the viewport rendering when it hung?
+- Did `bpy-bridge ping` still answer while it was hung?
+- Does it reproduce with a trivial `bpy-bridge exec '1 + 1'`?
+
+## Anything else
+
+<!-- Related issues, workarounds you tried, whether it used to work. -->

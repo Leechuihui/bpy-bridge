@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bpy-bridge"
+version = "0.1.0"
+description = "Drive a running Blender from any process: one line of code, real stdout, real tracebacks."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "bpy-bridge contributors" }]
+keywords = ["blender", "bpy", "automation", "remote", "tcp", "3d", "pipeline"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Graphics :: 3D Modeling",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+# Zero runtime dependencies is a feature, not an accident: the server half must
+# run inside Blender's bundled Python, which has no pip access by default.
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "pytest-cov>=4.0"]
+
+[project.urls]
+Homepage = "https://github.com/YOUR-USER/bpy-bridge"
+Issues = "https://github.com/YOUR-USER/bpy-bridge/issues"
+Changelog = "https://github.com/YOUR-USER/bpy-bridge/blob/main/CHANGELOG.md"
+
+[project.scripts]
+bpy-bridge = "bpy_bridge.cli:main"
+
+[tool.setuptools]
+packages = ["bpy_bridge"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+filterwarnings = ["error"]
+
+[tool.coverage.run]
+source = ["bpy_bridge"]
+omit = ["bpy_bridge/cli.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise SystemExit",
+]
