@@ -60,7 +60,7 @@ jobs:
         # icon. This makes both checked invariants.
         run: python tests/check_readme_links.py
 
-      - name: Check docs images: size budget and animated GIF
+      - name: "Check docs images: size budget, animated GIF, and references"
         # Screenshots and the demo GIF are build artifacts. They cannot be
         # regenerated in CI -- that needs a live Blender -- but two failure modes
         # are worth failing on:
