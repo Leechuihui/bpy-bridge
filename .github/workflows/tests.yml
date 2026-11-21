@@ -44,6 +44,12 @@ jobs:
         # that unit tests structurally cannot see.
         run: python tests/e2e_smoke.py
 
+      - name: Check bilingual README links
+        # The language switcher is pure convention: a renamed file or a typo in
+        # a relative link renders as a silent 404 on GitHub. This makes it a
+        # checked invariant instead.
+        run: python tests/check_readme_links.py
+
   lint:
     runs-on: ubuntu-latest
     steps:

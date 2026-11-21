@@ -1,5 +1,7 @@
 # bpy-bridge
 
+**English** | [简体中文](README.zh-CN.md)
+
 **Drive a running Blender from any process — one line of code, real stdout, real tracebacks.**
 
 [![tests](https://github.com/YOUR-USER/bpy-bridge/actions/workflows/tests.yml/badge.svg)](https://github.com/YOUR-USER/bpy-bridge/actions/workflows/tests.yml)
@@ -200,6 +202,7 @@ and `exec()` it as shown above. It has no imports outside the standard library.
 pip install -e ".[dev]"
 pytest -q                        # 117 tests, no Blender required
 python tests/e2e_smoke.py        # 8 checks across two real processes
+python tests/check_readme_links.py  # language switcher + relative links
 ```
 
 The test suite carries a fake `bpy` (`tests/fake_bpy.py`) that mimics the slice of the API the bridge touches, plus a background "pump" thread that plays the role of Blender's main thread. That means CI can verify the threading model without ever launching Blender.

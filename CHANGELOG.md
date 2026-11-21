@@ -35,6 +35,10 @@ First release. The protocol is at version 1 and the wire format is documented in
   package around it.
 - `tests/e2e_smoke.py`, which drives a real bridge in a separate process
   through the installed CLI and asserts on exit codes.
+- Bilingual documentation: `README.md` (English, default) and
+  `README.zh-CN.md` (Simplified Chinese), each with a language switcher.
+- `tests/check_readme_links.py`, which verifies the switcher exists in both
+  files and that every relative link resolves to a real path.
 
 ### Known limitations
 

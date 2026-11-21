@@ -24,6 +24,7 @@ Before you open a PR:
 pytest -q
 python tests/standalone_server_check.py
 python tests/e2e_smoke.py
+python tests/check_readme_links.py
 python -m compileall -q bpy_bridge tests
 ```
 
@@ -34,6 +35,26 @@ token never being written to disk, and the trailing expression of a
 multi-statement snippet being dropped — were invisible to the unit tests and
 immediately obvious to this script. If you change anything about packaging,
 exit codes, or the request path, run it.
+
+## Keeping the two READMEs in sync
+
+`README.md` is the English default; `README.zh-CN.md` is the Simplified Chinese
+translation. Both start with a language switcher that links to the other, and
+`tests/check_readme_links.py` enforces that the switcher exists and that every
+relative link in either file resolves.
+
+What it cannot enforce is that the two versions say the *same thing*. So:
+
+- **Any user-visible change goes into both files in the same PR.** A feature
+  documented only in English is a bug for half the readers.
+- Keep the section structure parallel — same headings, same order, same tables.
+  It makes drift obvious at a glance during review.
+- Translate meaning, not words. The Chinese version is allowed to phrase things
+  naturally for Chinese readers; it is not allowed to omit a caveat.
+- Code blocks stay identical apart from comments. Commands do not translate.
+- `docs/` is English-only for now. If you translate a doc, add a `.zh-CN.md`
+  sibling and link it from the language switcher rather than replacing the
+  original.
 
 ## The three rules that matter
 

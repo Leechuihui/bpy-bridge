@@ -23,6 +23,26 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 
+#: Decode every child pipe as UTF-8, regardless of the host locale.
+#:
+#: ``text=True`` alone uses the *locale* encoding, which on a Chinese Windows
+#: install is GBK. The CLI emits UTF-8 (its error messages can contain non-ASCII
+#: paths, and CI runners are UTF-8), so the two disagree and the reader thread
+#: raises ``UnicodeDecodeError``. Worse, that exception is swallowed by
+#: ``subprocess``'s reader thread: the process still returns exit 0, the stderr
+#: text is silently lost, and a real failure would be reported as a pass. Pinning
+#: the encoding on both sides is what makes this script trustworthy.
+PIPE_TEXT = dict(text=True, encoding="utf-8", errors="replace")
+
+
+def child_env(extra=None):
+    """Environment for a child process, forced to UTF-8 I/O."""
+    env = dict(os.environ)
+    env["PYTHONIOENCODING"] = "utf-8"
+    if extra:
+        env.update(extra)
+    return env
+
 # The child process runs this snippet: build a fake bpy, start a real bridge,
 # print the port and token path, then idle until killed.
 BRIDGE_CHILD = r'''
@@ -105,10 +125,10 @@ def run_cli(args, env, expect=0):
     completed = subprocess.run(
         command,
         capture_output=True,
-        text=True,
         env=env,
         timeout=60,
         cwd=ROOT,
+        **PIPE_TEXT
     )
     if completed.returncode != expect:
         raise SmokeFailure(
@@ -127,7 +147,8 @@ def main():
         [sys.executable, "-c", script],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True,
+        env=child_env(),
+        **PIPE_TEXT
     )
     try:
         # First line of stdout is the ready banner with the ephemeral port.
@@ -138,8 +159,7 @@ def main():
         info = json.loads(line)
         port = str(info["port"])
 
-        env = dict(os.environ)
-        env["BPY_BRIDGE_HOME"] = temp_dir
+        env = child_env({"BPY_BRIDGE_HOME": temp_dir})
 
         checks = []
 
