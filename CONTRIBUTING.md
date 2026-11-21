@@ -6,7 +6,7 @@ a change merged is to keep it that way.
 ## Getting set up
 
 ```bash
-git clone https://github.com/YOUR-USER/bpy-bridge.git
+git clone https://github.com/Leechuihui/bpy-bridge.git
 cd bpy-bridge
 python -m pip install -e ".[dev]"
 pytest -q

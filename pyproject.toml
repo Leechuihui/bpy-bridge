@@ -34,9 +34,9 @@ dependencies = []
 dev = ["pytest>=7.0", "pytest-cov>=4.0"]
 
 [project.urls]
-Homepage = "https://github.com/YOUR-USER/bpy-bridge"
-Issues = "https://github.com/YOUR-USER/bpy-bridge/issues"
-Changelog = "https://github.com/YOUR-USER/bpy-bridge/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/Leechuihui/bpy-bridge"
+Issues = "https://github.com/Leechuihui/bpy-bridge/issues"
+Changelog = "https://github.com/Leechuihui/bpy-bridge/blob/main/CHANGELOG.md"
 
 [project.scripts]
 bpy-bridge = "bpy_bridge.cli:main"

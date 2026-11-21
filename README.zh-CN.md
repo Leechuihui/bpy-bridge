@@ -4,7 +4,7 @@
 
 **从任意进程驱动正在运行的 Blender —— 一行代码，拿到真实 stdout 和真实 traceback。**
 
-[![tests](https://github.com/YOUR-USER/bpy-bridge/actions/workflows/tests.yml/badge.svg)](https://github.com/YOUR-USER/bpy-bridge/actions/workflows/tests.yml)
+[![tests](https://github.com/Leechuihui/bpy-bridge/actions/workflows/tests.yml/badge.svg)](https://github.com/Leechuihui/bpy-bridge/actions/workflows/tests.yml)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 [![Blender 3.2+](https://img.shields.io/badge/blender-3.2%2B-orange.svg)](https://www.blender.org/)
 [![zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](#为什么零依赖)
@@ -215,7 +215,7 @@ pip install bpy-bridge
 服务端文件也可以**完全不安装任何东西**直接用：
 
 ```bash
-curl -O https://raw.githubusercontent.com/YOUR-USER/bpy-bridge/main/bpy_bridge/server.py
+curl -O https://raw.githubusercontent.com/Leechuihui/bpy-bridge/main/bpy_bridge/server.py
 ```
 
 然后按上面演示的方式 `exec()` 它。它没有任何标准库以外的 import。

@@ -4,7 +4,7 @@
 
 **Drive a running Blender from any process — one line of code, real stdout, real tracebacks.**
 
-[![tests](https://github.com/YOUR-USER/bpy-bridge/actions/workflows/tests.yml/badge.svg)](https://github.com/YOUR-USER/bpy-bridge/actions/workflows/tests.yml)
+[![tests](https://github.com/Leechuihui/bpy-bridge/actions/workflows/tests.yml/badge.svg)](https://github.com/Leechuihui/bpy-bridge/actions/workflows/tests.yml)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 [![Blender 3.2+](https://img.shields.io/badge/blender-3.2%2B-orange.svg)](https://www.blender.org/)
 [![zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](#why-zero-dependencies)
@@ -225,7 +225,7 @@ Requires Python 3.8+ on the client side. Blender 3.2+ on the server side (`temp_
 The server file is also usable **without installing anything**:
 
 ```bash
-curl -O https://raw.githubusercontent.com/YOUR-USER/bpy-bridge/main/bpy_bridge/server.py
+curl -O https://raw.githubusercontent.com/Leechuihui/bpy-bridge/main/bpy_bridge/server.py
 ```
 
 and `exec()` it as shown above. It has no imports outside the standard library.

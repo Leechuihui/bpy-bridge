@@ -133,5 +133,5 @@ scene, which is the only way they could have been found.
   pixel difference of exactly 0.00 -- the geometry is genuinely occluded. The
   measurement chose the demo, not the other way round.
 
-[Unreleased]: https://github.com/YOUR-USER/bpy-bridge/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/YOUR-USER/bpy-bridge/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Leechuihui/bpy-bridge/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Leechuihui/bpy-bridge/releases/tag/v0.1.0
