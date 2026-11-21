@@ -196,26 +196,11 @@ CLI 的退出码是契约的一部分：
 
 ## 工作原理
 
-```
-  你的进程                     Blender 进程
-  ────────────                 ─────────────────────────────────────────
-  BridgeClient
-      │  TCP 127.0.0.1:9876
-      │  {"op":"exec", ...}\n
-      ├──────────────────▶  socket 工作线程
-                                   │  绝不碰 bpy
-                                   │  queue.put((code, box, event))
-                                   ▼
-                             bpy.app.timers  ──▶  主线程
-                                                   在持久命名空间里
-                                                   eval/exec
-                                                   捕获 stdout + tb
-                                   │
-      ◀──────────────────  {"ok":true,"result":"...", ...}\n
-      queue 的 event.set()  ◀──────────┘
-```
+![一个请求穿过线程边界：socket 工作线程绝不碰 bpy](docs/images/architecture.png)
 
-工作线程阻塞在一个 `threading.Event` 上，主线程负责干活。一条连接承载一个请求和一个响应，然后关闭 —— 这听起来很浪费，但事实上正是它没有分帧 bug 的原因。
+整个设计的存在，只为遵守一条约束：**`bpy` 只能在主线程上用。** 所以 socket 工作线程绝不碰它。它把活儿编码好，丢进队列，然后阻塞在一个 `threading.Event` 上。一个 `bpy.app.timers` 回调在 Blender 主线程上把队列排空、在那儿执行代码、捕获 `stdout` 和 traceback，再唤醒等待中的工作线程。没有任何东西是朝错误方向穿过那条边界的。
+
+一条连接承载一个请求和一个响应，然后关闭 —— 这听起来很浪费，但事实上正是它没有分帧 bug 的原因。
 
 `docs/protocol.md` 把线格式（wire format）记到了足够精确的程度，你可以照着用别的语言写一个客户端。
 

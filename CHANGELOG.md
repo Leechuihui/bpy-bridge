@@ -65,9 +65,10 @@ First release. The protocol is at version 1 and the wire format is documented in
 - `tests/check_readme_links.py`, which verifies every bilingual pair cross-links
   near the top of both files, that every relative link in every doc resolves,
   and that every image any doc references exists.
-- `tests/check_docs_images.py`, which enforces a size budget on the doc images
-  and verifies the demo GIF is genuinely animated: several frames, each visibly
-  different from the last.
+- `tests/check_docs_images.py`, which enforces a size budget on the doc images,
+  verifies the demo GIF is genuinely animated (several frames, each visibly
+  different from the last), and verifies every committed image is actually
+  referenced by a document.
 
 ### Fixed
 
@@ -108,6 +109,12 @@ scene, which is the only way they could have been found.
   in the JSON envelope's `error` field. It reported "CLI failed (exit 1)" with no
   cause, which cost real debugging time. The envelope's `kind`, `error` and
   `stdout` are now included in the message.
+- **`architecture.png` was committed but never displayed.** The README's "How it
+  works" section kept its old ASCII diagram while the generated image sat unused
+  in the repository. Every existing check verified that *referenced* paths
+  resolve; none verified that files are referenced at all, so nothing could
+  notice. Both READMEs now show the diagram, and
+  `tests/check_docs_images.py` fails on any committed image no document mentions.
 
 ### Changed
 

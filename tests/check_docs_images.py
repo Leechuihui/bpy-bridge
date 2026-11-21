@@ -132,16 +132,71 @@ def check_gif_is_animated(path=DEMO_GIF):
     return problems
 
 
+def check_images_are_referenced():
+    """Every committed image must actually appear in a document.
+
+    This exists because one did not. ``architecture.png`` was generated, committed
+    and shipped, but the README kept its old ASCII diagram, so the image was dead
+    weight that nobody ever saw -- and no existing check could notice, because
+    they all verified that *referenced* paths resolve, not that files are
+    referenced at all.
+
+    An unreferenced image is either a forgotten diagram or a leftover from a
+    deleted section. Both are worth failing on: one is a documentation gap, the
+    other is a repository getting quietly heavier.
+    """
+    if not os.path.isdir(IMAGE_DIR):
+        return ["docs/images is missing"]
+
+    # Every markdown file that can render an image.
+    documents = []
+    for directory, _subdirs, filenames in os.walk(ROOT):
+        # Skip anything that is not documentation.
+        if os.sep + "." in directory or os.sep + "build" in directory:
+            continue
+        for filename in filenames:
+            if filename.lower().endswith(".md"):
+                documents.append(os.path.join(directory, filename))
+
+    if not documents:
+        return ["no markdown documents found to check image references"]
+
+    problems = []
+    print()
+    print("image references:")
+    for name in sorted(os.listdir(IMAGE_DIR)):
+        if os.path.splitext(name)[1].lower() not in SIZE_LIMITS:
+            continue
+        referencing = []
+        for path in documents:
+            try:
+                with open(path, "r", encoding="utf-8") as handle:
+                    if name in handle.read():
+                        referencing.append(os.path.relpath(path, ROOT))
+            except (OSError, UnicodeDecodeError):
+                continue
+        if referencing:
+            print("  %-28s %s" % (name, ", ".join(sorted(referencing))))
+        else:
+            print("  %-28s NOT REFERENCED" % name)
+            problems.append(
+                "%s is committed but no document references it -- either show it "
+                "somewhere or delete it" % name
+            )
+    return problems
+
+
 def main():
     problems = check_size_budget()
     problems.extend(check_gif_is_animated())
+    problems.extend(check_images_are_referenced())
 
     print()
     if problems:
         for problem in problems:
             print("FAIL: %s" % problem)
         return 1
-    print("OK: doc images within budget and demo.gif is genuinely animated")
+    print("OK: doc images within budget, the GIF is animated, and every image is used")
     return 0
 
 

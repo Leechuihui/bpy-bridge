@@ -92,6 +92,13 @@ into a doc by hand.** If the CLI changes, re-run the renderer; the images follow
 the code automatically. That is the only reason the tutorial's screenshots can be
 trusted.
 
+`tests/check_docs_images.py` enforces three things about `docs/images/`: a size
+budget, that `demo.gif` is genuinely animated, and that **every committed image is
+referenced by some document**. That last one exists because `architecture.png` was
+generated, committed and shipped while the README kept its old ASCII diagram — the
+image was dead weight nobody ever saw. An image no doc mentions is either a
+forgotten diagram or a leftover from a deleted section; both are worth failing on.
+
 `tools/render_demo_gif.py` records the camera transform, collection visibility and
 render settings before it starts, restores all of them afterwards, and then
 verifies the restore. If you change it, keep that property: a documentation tool

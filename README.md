@@ -200,26 +200,17 @@ The client half uses only `socket` and `json` for the same reason: it should wor
 
 ## How it works
 
-```
-  your process                 Blender process
-  ────────────                 ─────────────────────────────────────────
-  BridgeClient
-      │  TCP 127.0.0.1:9876
-      │  {"op":"exec", ...}\n
-      ├──────────────────▶  socket worker thread
-                                   │  never touches bpy
-                                   │  queue.put((code, box, event))
-                                   ▼
-                             bpy.app.timers  ──▶  main thread
-                                                    eval/exec in a
-                                                    persistent namespace
-                                                    capture stdout + tb
-                                   │
-      ◀──────────────────  {"ok":true,"result":"...", ...}\n
-      queue's event.set()  ◀──────────┘
-```
+![A request crossing the thread boundary: the socket worker never touches bpy](docs/images/architecture.png)
 
-The worker thread blocks on a `threading.Event` while the main thread does the work. One connection carries one request and one response, then closes — which sounds wasteful and is in fact the reason there are no framing bugs.
+The whole design exists to respect one constraint: **`bpy` is main-thread only.**
+So the socket worker thread never touches it. It encodes the work, drops it in a
+queue, and blocks on a `threading.Event`. A `bpy.app.timers` callback drains that
+queue on Blender's main thread, runs the code there, captures `stdout` and the
+traceback, and signals the waiting worker. Nothing crosses the boundary in the
+wrong direction.
+
+One connection carries one request and one response, then closes — which sounds
+wasteful and is in fact the reason there are no framing bugs.
 
 `docs/protocol.md` documents the wire format precisely enough to write a client in another language.
 
