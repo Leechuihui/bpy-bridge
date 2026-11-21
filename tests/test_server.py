@@ -414,7 +414,11 @@ def test_tcp_screenshot_reaches_bpy_ops(live):
     client = BridgeClient(host=live.host, port=live.port, token=live.token)
     result = client.screenshot("C:/tmp/ui.png")
     assert result.ok is True
-    assert live.bpy.ops.screen.calls == ["C:\\tmp\\ui.png"]
+    # The server absolutizes before handing the path to the operator, so the
+    # expected value has to be absolutized the same way. Hard-coding the Windows
+    # form ("C:\\tmp\\ui.png") passed here and failed on Linux and macOS, where
+    # "C:/tmp/ui.png" is not absolute and gets joined onto the working directory.
+    assert live.bpy.ops.screen.calls == [os.path.abspath("C:/tmp/ui.png")]
 
 
 def test_tcp_run_file_executes_local_file(live, tmp_path):

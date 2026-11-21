@@ -14,6 +14,16 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python: ["3.8", "3.10", "3.12"]
+        exclude:
+          # ubuntu-latest has moved to 26.04, whose toolcache has no 3.8 build;
+          # setup-python fails before a single test runs. Pin the oldest
+          # supported interpreter to an image that still ships it rather than
+          # dropping coverage for the version pyproject.toml still claims.
+          - os: ubuntu-latest
+            python: "3.8"
+        include:
+          - os: ubuntu-22.04
+            python: "3.8"
 
     steps:
       - uses: actions/checkout@v4
