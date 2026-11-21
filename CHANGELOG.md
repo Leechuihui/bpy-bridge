@@ -19,6 +19,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - The screenshot test hard-coded a Windows path and failed on Linux and macOS;
   it now absolutizes the expectation the way the server does.
+- The issue templates were invalid issue *forms* — they used the old
+  `.md`-template keys (`about`) inside `.yml` files, so GitHub read them as
+  forms, found no `description`/`body`, and rendered neither. Both are now real
+  forms with required version/OS fields and an exit-code block, and
+  `tests/check_repo_metadata.py` (new, wired into CI) verifies form structure
+  and rejects placeholder URLs in metadata. Note that the community-profile API
+  still reports `issue_template: MISSING` for YAML forms — it does so for
+  microsoft/vscode, python/cpython and rust-lang/rust too; the field only
+  recognises `.md` templates, which is a GitHub quirk, not a broken template.
 - CI: a workflow step name containing `: ` broke YAML parsing, so no job ever
   started. Python 3.8 also moved to a pinned `ubuntu-22.04`, because
   `ubuntu-latest` (26.04) has no 3.8 in its toolcache.
