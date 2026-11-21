@@ -25,7 +25,8 @@ pytest -q
 python tests/standalone_server_check.py
 python tests/e2e_smoke.py
 python tests/check_readme_links.py
-python -m compileall -q bpy_bridge tests
+python tests/check_docs_images.py      # needs: pip install pillow
+python -m compileall -q bpy_bridge tests tools examples
 ```
 
 `tests/e2e_smoke.py` is the one that earns its keep. It starts a real bridge in a
@@ -38,13 +39,16 @@ exit codes, or the request path, run it.
 
 ## Keeping the two languages in sync
 
-Three documents exist in both languages:
+Every document exists in both languages:
 
 | English | Simplified Chinese |
 |---|---|
 | `README.md` | `README.zh-CN.md` |
 | `docs/tutorial.md` | `docs/tutorial.zh-CN.md` |
 | `docs/configuration.md` | `docs/configuration.zh-CN.md` |
+| `docs/protocol.md` | `docs/protocol.zh-CN.md` |
+| `docs/security.md` | `docs/security.zh-CN.md` |
+| `docs/install.md` | `docs/install.zh-CN.md` |
 
 English is the default. Each pair starts with a language switcher that links to
 its counterpart, and `tests/check_readme_links.py` enforces that the switcher
@@ -59,10 +63,16 @@ What it cannot enforce is that the two versions say the *same thing*. So:
 - Translate meaning, not words. The Chinese version is allowed to phrase things
   naturally for Chinese readers; it is not allowed to omit a caveat.
 - Code blocks stay identical apart from comments. Commands do not translate.
-- `docs/protocol.md`, `docs/security.md`, and `docs/install.md` are still
-  English-only. If you translate one, add a `.zh-CN.md` sibling, add the pair to
-  `LANGUAGE_PAIRS` in `tests/check_readme_links.py`, and link it from the
-  switcher — do not replace the original.
+- Adding a new doc means adding it in **both** languages, plus a row in
+  `LANGUAGE_PAIRS` and `LINKED_FILES` in `tests/check_readme_links.py`. The
+  checker fails if a `.zh-CN.md` sibling exists without a switcher, so a
+  half-translated doc cannot ship quietly.
+- **Translating is also a review of the original.** Writing the Chinese version
+  of `docs/protocol.md` surfaced two stale claims in the English file (that `bpy`
+  was not injected, and that code was compiled as an expression with a statement
+  fallback) — both had been true, neither was any more. If a sentence is hard to
+  translate because it does not quite make sense, that is a signal to check the
+  code.
 
 ## Screenshots are build artifacts
 
@@ -72,6 +82,7 @@ Every image under `docs/images/` is generated, not hand-made:
 pip install pillow                       # docs-only dependency
 python tools/render_terminal.py          # 8 terminal screenshots
 python tools/render_architecture.py      # the thread-boundary diagram
+python tools/render_demo_gif.py          # the orbiting-camera GIF
 ```
 
 `tools/screenshots.json` lists the commands to run. The renderer executes each
@@ -80,6 +91,23 @@ and draws the result. **Never hand-edit a screenshot and never transcribe output
 into a doc by hand.** If the CLI changes, re-run the renderer; the images follow
 the code automatically. That is the only reason the tutorial's screenshots can be
 trusted.
+
+`tools/render_demo_gif.py` records the camera transform, collection visibility and
+render settings before it starts, restores all of them afterwards, and then
+verifies the restore. If you change it, keep that property: a documentation tool
+that leaves the user's project modified is a bug.
+
+Two lessons from building these, worth not relearning:
+
+- **`bpy.ops.render.opengl` defaults to `view_context=True`**, which renders the
+  *viewport's* current view rather than the scene camera. The first orbit GIF came
+  out as eight near-identical frames (mean pixel difference 0.04–0.12) because
+  moving the camera changed nothing visible. Pass `view_context=False` when you
+  mean "render from the scene camera".
+- **Measure before choosing what the demo shows.** Hiding `Scatter_Low` (555
+  objects), `Scatter_OuterLeaves` (417) and `Shore_Fringe` (359) changes the
+  rendered image by exactly 0.00 — they are genuinely occluded. Object count is
+  not visual impact.
 
 To regenerate one image:
 

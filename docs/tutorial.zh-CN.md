@@ -307,6 +307,7 @@ bpy-bridge --port 1 ping
 pip install pillow
 python tools/render_terminal.py       # 全部 8 张终端截图
 python tools/render_architecture.py   # 架构图
+python tools/render_demo_gif.py       # 相机环绕演示 GIF
 ```
 
 `tools/screenshots.json` 列出要跑哪些命令；`tools/render_terminal.py` 真去跑它们，捕获 stdout/stderr/退出码，再把结果画出来。CLI 变了，重跑脚本图片就更新。没有任何东西是手工誊写的 —— 这是文档保持真实的唯一办法。
@@ -317,10 +318,18 @@ python tools/render_architecture.py   # 架构图
 python tools/render_terminal.py --only terminal-status
 ```
 
+`tools/render_demo_gif.py` 同理：它让 `Cam_Main` 环绕八个方位角，每帧一条真实的 `exec`，每次都渲染真正的场景相机。它会先记录相机变换、集合可见性和渲染设置，跑完全部还原 —— 然后**验证**还原成功，因为一个会把你项目改坏的文档工具就是 bug。
+
+> **为什么是环绕，而不是逐层开关。** GIF 的第一个版本是逐层隐藏散布层。对着这个场景一测，
+> 隐藏 `Scatter_Low`（555 个对象）、`Scatter_OuterLeaves`（417）、`Shore_Fringe`（359）产生的
+> 像素差异恰好是 **0.00** —— 这些几何体确实被更高的层挡住了。一个每帧看起来都一样的演示不叫演示，
+> 所以是测量结果决定了演示形式，而不是反过来。
+
 ---
 
 ## 接下来读什么
 
 - **[配置说明](configuration.zh-CN.md)** —— 端口、token、超时、自启动，以及服务端和客户端暴露的每一个旋钮。
-- **[协议](protocol.md)** —— 线格式，精确到你可以用另一种语言写客户端。（目前仅英文）
-- **[安全](security.md)** —— 默认值防住了什么，又故意不防什么。（目前仅英文）
+- **[协议](protocol.zh-CN.md)** —— 线格式，精确到你可以用另一种语言写客户端。
+- **[安全](security.zh-CN.md)** —— 默认值防住了什么，又故意不防什么。
+- **[安装](install.zh-CN.md)** —— 让桥接每次启动 Blender 都自动就位。

@@ -1,5 +1,7 @@
 # Installing the bridge so it is always there
 
+**English** | [简体中文](install.zh-CN.md)
+
 Two ways, depending on how much you want to think about it.
 
 ## Option A — the one-liner (no install)

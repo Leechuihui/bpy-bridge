@@ -60,39 +60,23 @@ jobs:
         # icon. This makes both checked invariants.
         run: python tests/check_readme_links.py
 
-      - name: Check docs images are present and not oversized
-        # Screenshots are build artifacts (tools/render_terminal.py). They cannot
-        # be regenerated in CI -- that needs a live Blender -- but committing a
-        # 10 MB PNG is a mistake worth failing on.
+      - name: Check docs images: size budget and animated GIF
+        # Screenshots and the demo GIF are build artifacts. They cannot be
+        # regenerated in CI -- that needs a live Blender -- but two failure modes
+        # are worth failing on:
+        #
+        #   1. A 10 MB PNG committed by accident.
+        #   2. A GIF that is not actually animated. This happened for real: the
+        #      first orbit demo came out as eight near-identical frames (mean
+        #      pixel difference 0.04-0.12) because bpy.ops.render.opengl defaults
+        #      to view_context=True and was rendering the viewport instead of the
+        #      scene camera. Nothing else in the suite would have caught it.
+        #
+        # The checks live in tests/check_docs_images.py rather than inline here so
+        # that they run identically on a developer's machine.
         run: |
-          python - <<'PY'
-          import os
-          import sys
-
-          image_dir = "docs/images"
-          if not os.path.isdir(image_dir):
-              sys.exit("docs/images is missing")
-
-          limit = 1_500_000
-          problems = []
-          total = 0
-          for name in sorted(os.listdir(image_dir)):
-              if not name.lower().endswith(".png"):
-                  continue
-              size = os.path.getsize(os.path.join(image_dir, name))
-              total += size
-              if size > limit:
-                  problems.append("%s is %.1f MB (limit %.1f MB)"
-                                  % (name, size / 1e6, limit / 1e6))
-              print("%-30s %8.1f KB" % (name, size / 1024.0))
-
-          print("total: %.1f MB" % (total / 1e6))
-          if problems:
-              for problem in problems:
-                  print("FAIL:", problem)
-              sys.exit(1)
-          print("OK: all doc images within budget")
-          PY
+          python -m pip install --quiet pillow
+          python tests/check_docs_images.py
 
   lint:
     runs-on: ubuntu-latest

@@ -1,5 +1,7 @@
 # Security model
 
+**English** | [简体中文](security.zh-CN.md)
+
 `bpy-bridge` runs arbitrary Python inside your Blender, with your user's
 privileges, on your machine. That is the entire feature. Everything below is
 about making sure it does that *only* for you.

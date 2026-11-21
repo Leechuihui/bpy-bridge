@@ -42,6 +42,9 @@ LANGUAGE_PAIRS = (
     ("README.md", "README.zh-CN.md", "简体中文", "English"),
     ("docs/tutorial.md", "docs/tutorial.zh-CN.md", "简体中文", "English"),
     ("docs/configuration.md", "docs/configuration.zh-CN.md", "简体中文", "English"),
+    ("docs/protocol.md", "docs/protocol.zh-CN.md", "简体中文", "English"),
+    ("docs/security.md", "docs/security.zh-CN.md", "简体中文", "English"),
+    ("docs/install.md", "docs/install.zh-CN.md", "简体中文", "English"),
 )
 
 #: Files whose relative links are checked. Docs only; source comments are not
@@ -53,9 +56,12 @@ LINKED_FILES = (
     "docs/tutorial.zh-CN.md",
     "docs/configuration.md",
     "docs/configuration.zh-CN.md",
-    "docs/install.md",
     "docs/protocol.md",
+    "docs/protocol.zh-CN.md",
     "docs/security.md",
+    "docs/security.zh-CN.md",
+    "docs/install.md",
+    "docs/install.zh-CN.md",
     "CONTRIBUTING.md",
     "CHANGELOG.md",
 )

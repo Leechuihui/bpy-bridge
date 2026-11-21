@@ -1,5 +1,7 @@
 # Wire protocol, version 1
 
+**English** | [简体中文](protocol.zh-CN.md)
+
 This document is normative. If you write a client in another language, this is
 the whole specification.
 
@@ -28,7 +30,7 @@ the whole specification.
 | Field | Required | Type | Notes |
 |---|---|---|---|
 | `op` | no | string | `exec` (default), `ping`, or `status`. |
-| `code` | for `exec` | string | Python source. Evaluated as an expression first; if that fails with `SyntaxError`, executed as statements. |
+| `code` | for `exec` | string | Python source, evaluated with Python REPL semantics: statements run, and a trailing expression's value comes back as a `repr`. A trailing expression evaluating to `None` yields `null`. |
 | `token` | yes | string | Shared secret. Empty or wrong → `kind: "auth"`. |
 | `timeout` | no | number | Seconds the server waits for the main thread. Default `600`. Non-positive or unparseable values fall back to the default. |
 | `request_id` | no | string | Echoed back in the response. Use it to correlate. |
@@ -55,7 +57,7 @@ the whole specification.
 |---|---|---|
 | `ok` | boolean | Always `kind == "ok"`. |
 | `kind` | string | Machine-readable outcome, see below. |
-| `result` | string \| null | For `exec`: the Python `repr()` of the expression's value, or `null` for statement blocks. For `ping`: `"pong"`. For `status`: a JSON *string* that parses to the status object. |
+| `result` | string \| null | For `exec`: the Python `repr()` of the trailing expression's value, or `null` when there is no trailing expression or it evaluates to `None`. For `ping`: `"pong"`. For `status`: a JSON *string* that parses to the status object. |
 | `stdout` | string | Everything the code wrote to `sys.stdout` or `sys.stderr`, interleaved in write order. |
 | `error` | string | Traceback or message. Empty on success. |
 | `duration_ms` | number | Wall time spent on the main thread, rounded to 3 decimals. |
@@ -107,9 +109,8 @@ The namespace always contains:
 
 - `__name__` = `"__bpy_bridge__"`
 - `bridge` — a helper object (see below)
-
-`bpy` is *not* injected automatically; `import bpy` works because the code runs
-inside Blender, but importing it once into the namespace keeps things readable.
+- `bpy` — the real module, injected on first execution when it is importable
+  (i.e. always, inside Blender). Outside Blender it is absent rather than faked.
 
 ## The `bridge` helper
 
