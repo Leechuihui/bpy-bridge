@@ -70,6 +70,18 @@ jobs:
         # icon. This makes both checked invariants.
         run: python tests/check_readme_links.py
 
+      - name: "Check repo metadata: issue forms and placeholders"
+        # Two real defects shipped here: issue templates that used the old
+        # .md-template keys in .yml files (so GitHub read them as invalid forms
+        # and the community profile reported issue_template MISSING with no
+        # error pointing at the file), and a config.yml whose contact links
+        # still pointed at YOUR-USER after everything else had been rewritten.
+        # Both are metadata-only breakage -- tests stay green, the package
+        # installs -- and the failure mode is that people cannot report things.
+        run: |
+          python -m pip install --quiet pyyaml
+          python tests/check_repo_metadata.py
+
       - name: "Check docs images: size budget, animated GIF, and references"
         # Screenshots and the demo GIF are build artifacts. They cannot be
         # regenerated in CI -- that needs a live Blender -- but two failure modes

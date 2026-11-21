@@ -1,52 +1,110 @@
----
 name: Bug report
-about: Something does not work as documented
+description: Something does not work as documented
 title: ""
-labels: bug
-assignees: ""
----
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. The fields below are the ones that actually get a
+        bug diagnosed — "it doesn't work" without a Blender version cannot be.
 
-## What happened
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: One or two sentences. The actual behaviour, not the expected one.
+    validations:
+      required: true
 
-<!-- One or two sentences. The actual behaviour, not the expected one. -->
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
 
-## What you expected
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
 
-## Steps to reproduce
+  - type: input
+    id: version
+    attributes:
+      label: bpy-bridge version
+      description: Output of `bpy-bridge --version`, or the installed version.
+    validations:
+      required: true
 
-1.
-2.
-3.
+  - type: input
+    id: blender-version
+    attributes:
+      label: Blender version
+      description: "`bpy.app.version_string` — e.g. 4.2.0."
+    validations:
+      required: true
 
-## Environment
+  - type: input
+    id: os
+    attributes:
+      label: OS and version
+      placeholder: Windows 11, macOS 14.5, Ubuntu 22.04 …
+    validations:
+      required: true
 
-<!-- The fields that actually matter for this project. Please fill them in;
-     "it doesn't work" without a Blender version cannot be diagnosed. -->
+  - type: input
+    id: client-python
+    attributes:
+      label: Python version (client side)
 
-- `bpy-bridge --version` / installed version:
-- Blender version (`bpy.app.version_string`):
-- OS and version:
-- Python version (client side):
-- Bridge started from: <!-- Python console / scripts/startup autostart / other -->
+  - type: dropdown
+    id: started-from
+    attributes:
+      label: How was the bridge started?
+      options:
+        - Python console inside Blender
+        - Script or startup/autostart script
+        - Other
+    validations:
+      required: true
 
-## CLI output
+  - type: textarea
+    id: output
+    attributes:
+      label: CLI output
+      description: Paste the full output, including the exit code.
+      placeholder: |
+        On POSIX:   bpy-bridge exec 'x' ; echo "exit=$?"
+        On Windows: bpy-bridge exec 'x' ; echo "exit=$LASTEXITCODE"
+      render: shell
 
-<!-- Paste the full output, including the exit code.
-     On POSIX:  bpy-bridge exec 'x' ; echo "exit=$?"
-     On Windows: bpy-bridge exec 'x' ; echo "exit=$LASTEXITCODE" -->
+  - type: markdown
+    attributes:
+      value: |
+        ### If this is a threading / freeze issue
 
-```
-```
+        Blender's API is main-thread only, so freezes usually mean something
+        touched `bpy` from a socket thread. These three answers narrow it down
+        fast.
 
-## If this is a threading / freeze issue
+  - type: textarea
+    id: threading
+    attributes:
+      label: Threading details
+      placeholder: |
+        - Was the viewport rendering when it hung?
+        - Did `bpy-bridge ping` still answer while it was hung?
+        - Does it reproduce with a trivial `bpy-bridge exec '1 + 1'`?
 
-<!-- Blender's API is main-thread only. Freezes usually mean something touched
-     bpy from a socket thread. These details narrow it down fast. -->
-
-- Was the viewport rendering when it hung?
-- Did `bpy-bridge ping` still answer while it was hung?
-- Does it reproduce with a trivial `bpy-bridge exec '1 + 1'`?
-
-## Anything else
-
-<!-- Related issues, workarounds you tried, whether it used to work. -->
+  - type: textarea
+    id: anything-else
+    attributes:
+      label: Anything else
+      description: Related issues, workarounds you tried, whether it used to work.
