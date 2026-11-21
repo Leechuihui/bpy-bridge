@@ -36,6 +36,10 @@ EXIT_UNREACHABLE = 3
 EXIT_AUTH = 4
 EXIT_TIMEOUT = 5
 
+#: How many collection names ``status`` previews before summarising the rest.
+#: A production scene has dozens; the full list is available via ``--json``.
+COLLECTION_PREVIEW = 6
+
 _EXIT_FOR_ERROR = (
     (BridgeUnreachable, EXIT_UNREACHABLE),
     (BridgeAuthError, EXIT_AUTH),
@@ -192,9 +196,20 @@ def cmd_status(args):
     for key in ("blender", "scene", "file", "engine", "objects", "camera", "python", "pid"):
         if key in info:
             print("%-10s %s" % (key + ":", info[key]))
-    collections = info.get("collections")
+
+    collections = info.get("collections") or []
     if collections:
-        print("%-10s %s" % ("collections:", ", ".join(collections)))
+        # A real production scene has dozens of collections. Printing all of
+        # them on one line produces an unreadable wall of text that scrolls off
+        # the terminal -- the first live run on a 45-collection scene did exactly
+        # that. Show a count plus a short preview; --json carries the full list
+        # for anything that needs it.
+        preview = collections[:COLLECTION_PREVIEW]
+        print("%-10s %d" % ("collections:", len(collections)))
+        print("%-10s %s" % ("  first:", ", ".join(preview)))
+        if len(collections) > len(preview):
+            print("%-10s ... and %d more (use --json for the full list)"
+                  % ("", len(collections) - len(preview)))
     return EXIT_OK
 
 

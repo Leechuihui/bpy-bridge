@@ -1,0 +1,70 @@
+{
+  "_comment": [
+    "Manifest for tools/render_terminal.py.",
+    "Every entry runs a REAL command against a LIVE Blender session and draws the",
+    "captured stdout/stderr/exit code into a PNG. Nothing here is hand-written",
+    "output: if the CLI changes, re-running the renderer changes the screenshots.",
+    "",
+    "Requirements: Blender running with the bridge started on 127.0.0.1:9876,",
+    "the bpy-bridge CLI installed (pip install -e .), and Pillow available.",
+    "Regenerate with: python tools/render_terminal.py"
+  ],
+  "screenshots": [
+    {
+      "name": "terminal-ping",
+      "command": "bpy-bridge ping",
+      "caption": "bpy-bridge ping  —  is Blender listening?",
+      "prompt": "PS C:\\work>",
+      "show_exit_code": true
+    },
+    {
+      "name": "terminal-status",
+      "command": "bpy-bridge status",
+      "caption": "bpy-bridge status  —  the live scene, not a fixture",
+      "prompt": "PS C:\\work>",
+      "show_exit_code": true
+    },
+    {
+      "name": "terminal-exec",
+      "command": "bpy-bridge exec \"len(bpy.data.objects)\"",
+      "caption": "bpy-bridge exec  —  evaluate an expression",
+      "prompt": "PS C:\\work>",
+      "show_exit_code": true
+    },
+    {
+      "name": "terminal-inspect",
+      "command": "bpy-bridge exec --file examples/inspect_scene.py",
+      "caption": "bpy-bridge exec --file  —  run a script",
+      "prompt": "PS C:\\work>",
+      "show_exit_code": true
+    },
+    {
+      "name": "terminal-json",
+      "command": "bpy-bridge exec --json \"len(bpy.data.objects)\"",
+      "caption": "bpy-bridge exec --json  —  one JSON envelope, machine-readable",
+      "prompt": "PS C:\\work>",
+      "show_exit_code": true
+    },
+    {
+      "name": "terminal-traceback",
+      "command": "bpy-bridge exec \"1 / 0\"",
+      "caption": "A remote exception comes back with its real traceback",
+      "prompt": "PS C:\\work>",
+      "show_exit_code": true
+    },
+    {
+      "name": "terminal-auth",
+      "command": "bpy-bridge --token wrong-token ping",
+      "caption": "Wrong token: refused, exit code 4",
+      "prompt": "PS C:\\work>",
+      "show_exit_code": true
+    },
+    {
+      "name": "terminal-unreachable",
+      "command": "bpy-bridge --port 1 ping",
+      "caption": "Nothing listening: clear message, exit code 3",
+      "prompt": "PS C:\\work>",
+      "show_exit_code": true
+    }
+  ]
+}

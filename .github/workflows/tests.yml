@@ -44,11 +44,55 @@ jobs:
         # that unit tests structurally cannot see.
         run: python tests/e2e_smoke.py
 
-      - name: Check bilingual README links
-        # The language switcher is pure convention: a renamed file or a typo in
-        # a relative link renders as a silent 404 on GitHub. This makes it a
-        # checked invariant instead.
+  docs:
+    # Docs checks are OS- and Python-independent, so they run once instead of
+    # nine times across the matrix.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check bilingual links, docs links, and image paths
+        # Two conventions that fail silently on GitHub: a language switcher
+        # pointing at a renamed file, and an image path that renders as a broken
+        # icon. This makes both checked invariants.
         run: python tests/check_readme_links.py
+
+      - name: Check docs images are present and not oversized
+        # Screenshots are build artifacts (tools/render_terminal.py). They cannot
+        # be regenerated in CI -- that needs a live Blender -- but committing a
+        # 10 MB PNG is a mistake worth failing on.
+        run: |
+          python - <<'PY'
+          import os
+          import sys
+
+          image_dir = "docs/images"
+          if not os.path.isdir(image_dir):
+              sys.exit("docs/images is missing")
+
+          limit = 1_500_000
+          problems = []
+          total = 0
+          for name in sorted(os.listdir(image_dir)):
+              if not name.lower().endswith(".png"):
+                  continue
+              size = os.path.getsize(os.path.join(image_dir, name))
+              total += size
+              if size > limit:
+                  problems.append("%s is %.1f MB (limit %.1f MB)"
+                                  % (name, size / 1e6, limit / 1e6))
+              print("%-30s %8.1f KB" % (name, size / 1024.0))
+
+          print("total: %.1f MB" % (total / 1e6))
+          if problems:
+              for problem in problems:
+                  print("FAIL:", problem)
+              sys.exit(1)
+          print("OK: all doc images within budget")
+          PY
 
   lint:
     runs-on: ubuntu-latest
@@ -58,7 +102,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Compile every module
-        run: python -m compileall -q bpy_bridge tests
+        run: python -m compileall -q bpy_bridge tests tools examples
       - name: Check the CLI entry point responds
         run: |
           python -m pip install -e .

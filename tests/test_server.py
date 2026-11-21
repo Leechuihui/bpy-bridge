@@ -245,6 +245,30 @@ def test_exec_trailing_expression_sees_prior_assignments(bridge):
     assert response["result"] == "3"
 
 
+def test_exec_ending_in_none_returning_call_yields_null(bridge):
+    """Regression: a trailing expression that evaluates to None returns null.
+
+    ``repr(None)`` is the string ``"None"``, which is noise in --json output and
+    forces every consumer to special-case it. A Python REPL prints nothing for
+    None; this matches that.
+    """
+    bridge.start()
+    payload = _frame(bridge, code="print('done')")
+    with PumpingBridge(bridge):
+        response = _decode(bridge.handle_frame(payload))
+    assert response["ok"] is True
+    assert response["result"] is None
+    assert "done" in response["stdout"]
+
+
+def test_exec_none_literal_returns_null(bridge):
+    bridge.start()
+    payload = _frame(bridge, code="None")
+    with PumpingBridge(bridge):
+        response = _decode(bridge.handle_frame(payload))
+    assert response["result"] is None
+
+
 def test_exec_statements_only_still_returns_none(bridge):
     bridge.start()
     payload = _frame(bridge, code="a = 1\nb = 2")
@@ -301,6 +325,38 @@ def test_status_is_serialised_as_json(bridge):
     assert info["blender"] == "4.2.0"
     assert info["scene"] == "Scene"
     assert info["objects"] == 7
+
+
+def test_bpy_is_injected_into_the_namespace(bridge):
+    """Regression: the README's headline example must actually work.
+
+    The quickstart shows ``bpy-bridge exec 'len(bpy.data.objects)'``. The first
+    live run against a real 5,757-object scene raised ``NameError: name 'bpy' is
+    not defined`` because only ``bridge`` was injected. Documentation that shows
+    a command which fails is worse than no documentation, so this pins the
+    behaviour: inside Blender, ``bpy`` is simply there.
+    """
+    bridge.start()
+    payload = _frame(bridge, code="bpy.app.version_string")
+    with PumpingBridge(bridge):
+        response = _decode(bridge.handle_frame(payload))
+    assert response["ok"] is True
+    assert response["result"] == "'4.2.0'"
+
+
+def test_injected_bpy_is_the_real_module_object(bridge):
+    bridge.start()
+    payload = _frame(bridge, code="bpy is bridge.bpy")
+    with PumpingBridge(bridge):
+        response = _decode(bridge.handle_frame(payload))
+    assert response["result"] == "True"
+
+
+def test_ensure_bpy_is_a_noop_when_bpy_is_unavailable(tmp_path):
+    """Outside Blender, ``_ensure_bpy`` must not invent a module."""
+    server = BridgeServer(port=0, token_path=str(tmp_path / "t"), bpy_module=None)
+    server._ensure_bpy()
+    assert "bpy" not in server._namespace
 
 
 def test_bridge_helper_is_injected_into_the_namespace(bridge):
@@ -403,6 +459,55 @@ def test_start_is_idempotent(bridge):
 
 
 # ---------------------------------------------------------------- helper API
+def test_start_forwards_every_server_option(tmp_path, monkeypatch):
+    """The facade used by autostart scripts must not drop supported options.
+
+    ``start()`` is what an autostart file calls, so a setting it cannot express
+    is effectively undocumented even if ``BridgeServer`` supports it. This pins
+    the forwarding.
+    """
+    from bpy_bridge import server as server_module
+
+    captured = {}
+
+    class _RecordingServer(BridgeServer):
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+            super(_RecordingServer, self).__init__(**kwargs)
+
+    monkeypatch.setattr(server_module, "BridgeServer", _RecordingServer)
+    monkeypatch.setattr(server_module, "_ACTIVE", None)
+
+    server_module.start(
+        port=0,
+        token_path=str(tmp_path / "token"),
+        bpy_module=make_fake_bpy(),
+        max_frame_bytes=1024,
+        persist_token=False,
+        verbose=False,
+    )
+    try:
+        assert captured["max_frame_bytes"] == 1024
+        assert captured["persist_token"] is False
+        assert captured["host"] == "127.0.0.1"
+    finally:
+        server_module.stop()
+
+
+def test_start_is_idempotent_inside_blender(tmp_path, monkeypatch):
+    from bpy_bridge import server as server_module
+
+    monkeypatch.setattr(server_module, "_ACTIVE", None)
+    first = server_module.start(port=0, token_path=str(tmp_path / "token"),
+                                bpy_module=make_fake_bpy(), verbose=False)
+    try:
+        second = server_module.start(port=0, token_path=str(tmp_path / "token"),
+                                     bpy_module=make_fake_bpy(), verbose=False)
+        assert second is first
+    finally:
+        server_module.stop()
+
+
 def test_helper_status_without_bpy_raises_import_error():
     helper = BridgeHelper(bpy_module=None)
     with pytest.raises(ImportError):

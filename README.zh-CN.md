@@ -31,6 +31,37 @@ Blender 的 Python API 有一条铁律：**`bpy` 不是线程安全的，而且�
 - **默认就是安全的。** 只绑回环地址、随机 256 位 token、常时比较，除非你明确坚持，否则它拒绝把自己暴露到网络上。
 - **不需要 Blender 也能测。** 一个假的 `bpy` 让整套东西在 CI 里可测。
 
+## 看看它跑起来
+
+下面每一张截图，都是对着正在运行的 Blender 会话执行真实命令生成的 —— 那是一个**45 个集合、5,757 个对象**的生产场景，不是三个立方体的演示。它们是构建产物，由 `tools/render_terminal.py` 重新生成，所以不可能偏离代码的真实行为。
+
+从一个普通终端问正在运行的 Blender：它开着什么？
+
+```bash
+bpy-bridge status
+```
+
+![对着 5,757 个对象的实时场景执行 bpy-bridge status](docs/images/terminal-status.png)
+
+跑一个脚本，拿回它真实的输出：
+
+```bash
+bpy-bridge exec --file examples/inspect_scene.py
+```
+
+![在 Blender 内运行脚本](docs/images/terminal-inspect.png)
+
+还有那个会改变一次会话手感的功能 —— 视口给自己截图：
+
+```bash
+bpy-bridge shot viewport.png
+```
+
+![通过桥接抓取的实时 Blender 会话](docs/images/blender-window.png)
+
+**[→ 完整教程，8 个步骤](docs/tutorial.zh-CN.md)** ·
+**[→ 配置参考](docs/configuration.zh-CN.md)**
+
 ## 快速开始
 
 ### 1. 在 Blender 里启动桥接服务
@@ -202,7 +233,7 @@ curl -O https://raw.githubusercontent.com/YOUR-USER/bpy-bridge/main/bpy_bridge/s
 
 ```bash
 pip install -e ".[dev]"
-pytest -q                        # 117 项测试，不需要 Blender
+pytest -q                        # 127 项测试，不需要 Blender
 python tests/e2e_smoke.py        # 跨两个真实进程的 8 项检查
 python tests/check_readme_links.py  # 语言切换链接 + 相对链接
 ```

@@ -36,12 +36,19 @@ multi-statement snippet being dropped — were invisible to the unit tests and
 immediately obvious to this script. If you change anything about packaging,
 exit codes, or the request path, run it.
 
-## Keeping the two READMEs in sync
+## Keeping the two languages in sync
 
-`README.md` is the English default; `README.zh-CN.md` is the Simplified Chinese
-translation. Both start with a language switcher that links to the other, and
-`tests/check_readme_links.py` enforces that the switcher exists and that every
-relative link in either file resolves.
+Three documents exist in both languages:
+
+| English | Simplified Chinese |
+|---|---|
+| `README.md` | `README.zh-CN.md` |
+| `docs/tutorial.md` | `docs/tutorial.zh-CN.md` |
+| `docs/configuration.md` | `docs/configuration.zh-CN.md` |
+
+English is the default. Each pair starts with a language switcher that links to
+its counterpart, and `tests/check_readme_links.py` enforces that the switcher
+exists and that every relative link in every doc resolves.
 
 What it cannot enforce is that the two versions say the *same thing*. So:
 
@@ -52,9 +59,36 @@ What it cannot enforce is that the two versions say the *same thing*. So:
 - Translate meaning, not words. The Chinese version is allowed to phrase things
   naturally for Chinese readers; it is not allowed to omit a caveat.
 - Code blocks stay identical apart from comments. Commands do not translate.
-- `docs/` is English-only for now. If you translate a doc, add a `.zh-CN.md`
-  sibling and link it from the language switcher rather than replacing the
-  original.
+- `docs/protocol.md`, `docs/security.md`, and `docs/install.md` are still
+  English-only. If you translate one, add a `.zh-CN.md` sibling, add the pair to
+  `LANGUAGE_PAIRS` in `tests/check_readme_links.py`, and link it from the
+  switcher — do not replace the original.
+
+## Screenshots are build artifacts
+
+Every image under `docs/images/` is generated, not hand-made:
+
+```bash
+pip install pillow                       # docs-only dependency
+python tools/render_terminal.py          # 8 terminal screenshots
+python tools/render_architecture.py      # the thread-boundary diagram
+```
+
+`tools/screenshots.json` lists the commands to run. The renderer executes each
+one for real — against a live Blender session — captures stdout/stderr/exit code,
+and draws the result. **Never hand-edit a screenshot and never transcribe output
+into a doc by hand.** If the CLI changes, re-run the renderer; the images follow
+the code automatically. That is the only reason the tutorial's screenshots can be
+trusted.
+
+To regenerate one image:
+
+```bash
+python tools/render_terminal.py --only terminal-status
+```
+
+If you add a screenshot, add it to `tools/screenshots.json`, reference it from
+both tutorial languages, and the link checker will verify the path exists.
 
 ## The three rules that matter
 

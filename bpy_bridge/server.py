@@ -258,6 +258,22 @@ class BridgeServer(object):
         self._namespace.setdefault("__name__", "__bpy_bridge__")
         self._namespace["bridge"] = self._helper._bind(self._namespace)
 
+        # ``bpy`` is injected when it is reachable, so the obvious snippet works:
+        #
+        #     bpy-bridge exec 'len(bpy.data.objects)'
+        #
+        # The README has always shown that line, and the first live run against a
+        # real 5,757-object scene raised ``NameError: name 'bpy' is not defined``
+        # because the namespace only carried ``bridge``. Requiring an explicit
+        # ``import bpy`` for the single most common expression is friction with no
+        # upside: inside Blender the module is already loaded, and outside Blender
+        # there is nothing to inject. ``_ensure_bpy`` retries lazily for the case
+        # where the server was constructed before bpy was importable.
+        self._bpy_checked = False
+        if bpy_module is not None:
+            self._namespace.setdefault("bpy", bpy_module)
+            self._bpy_checked = True
+
         self._queue = queue.Queue()
         self._server = None
         self._thread = None
@@ -291,6 +307,23 @@ class BridgeServer(object):
     @property
     def requests_served(self):
         return self._requests
+
+    def _ensure_bpy(self):
+        """Make ``bpy`` available in the exec namespace, once.
+
+        Construction may happen before ``bpy`` is importable (a test harness, or
+        a startup script that runs early). Rather than failing forever, retry
+        lazily on the first execution and cache the answer -- successful or not --
+        so a non-Blender process does not pay for an ``ImportError`` per request.
+        """
+        if self._bpy_checked:
+            return
+        self._bpy_checked = True
+        try:
+            module = self.bpy
+        except ImportError:
+            return
+        self._namespace.setdefault("bpy", module)
 
     def start(self):
         """Bind, start the worker thread, and register the main-thread pump."""
@@ -418,6 +451,7 @@ class BridgeServer(object):
         out = io.StringIO()
         saved_stdout, saved_stderr = sys.stdout, sys.stderr
         started = time.time()
+        self._ensure_bpy()
         sys.stdout = out
         sys.stderr = out
         try:
@@ -428,7 +462,12 @@ class BridgeServer(object):
                 trailing = ast.Expression(tree.body[-1].value)
                 body = ast.Module(body=tree.body[:-1], type_ignores=[])
                 exec(compile(body, "<bpy-bridge>", "exec"), namespace)
-                box["result"] = repr(eval(compile(trailing, "<bpy-bridge>", "eval"), namespace))
+                value = eval(compile(trailing, "<bpy-bridge>", "eval"), namespace)
+                # A Python REPL prints nothing for None, and neither should this.
+                # Without the check, a script ending in ``print(...)`` returns the
+                # string "None" -- repr(None) -- which is noise in --json output
+                # and forces every consumer to special-case it.
+                box["result"] = None if value is None else repr(value)
             else:
                 exec(compile(tree, "<bpy-bridge>", "exec"), namespace)
                 box["result"] = None
@@ -626,15 +665,24 @@ _ACTIVE = None
 
 
 def start(host=DEFAULT_HOST, port=DEFAULT_PORT, token=None, token_path=None,
-          bpy_module=None, allow_remote=False, verbose=True):
-    """Start (or return the already running) bridge inside Blender."""
+          bpy_module=None, allow_remote=False, verbose=True,
+          max_frame_bytes=MAX_FRAME_BYTES, namespace=None, persist_token=True):
+    """Start (or return the already running) bridge inside Blender.
+
+    This is the entry point an autostart script calls, so it forwards every
+    ``BridgeServer`` option rather than a curated subset. A facade that silently
+    cannot express a supported setting is how documentation starts describing
+    parameters that do not exist.
+    """
     global _ACTIVE
     if _ACTIVE is not None and _ACTIVE.running:
         if verbose:
             print("[bpy-bridge] already listening on %s:%d" % _ACTIVE.address)
         return _ACTIVE
     server = BridgeServer(host=host, port=port, token=token, token_path=token_path,
-                          bpy_module=bpy_module, allow_remote=allow_remote)
+                          bpy_module=bpy_module, allow_remote=allow_remote,
+                          max_frame_bytes=max_frame_bytes, namespace=namespace,
+                          persist_token=persist_token)
     server.start()
     _ACTIVE = server
     if verbose:

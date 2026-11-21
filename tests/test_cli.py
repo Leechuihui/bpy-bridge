@@ -13,6 +13,9 @@ from bpy_bridge.protocol import BridgeAuthError, BridgeTimeout, BridgeUnreachabl
 class _FakeClient(object):
     """Stands in for BridgeClient inside the CLI commands."""
 
+    #: Overridable per test; a production scene has dozens of collections.
+    collections = ()
+
     def __init__(self, *args, **kwargs):
         self.args = (args, kwargs)
 
@@ -20,7 +23,10 @@ class _FakeClient(object):
         return True
 
     def status(self):
-        return {"blender": "4.2.0", "scene": "Scene", "objects": 3}
+        info = {"blender": "4.2.0", "scene": "Scene", "objects": 3}
+        if self.collections:
+            info["collections"] = list(self.collections)
+        return info
 
     def exec(self, code, timeout=None):
         if code.strip() == "explode":
@@ -31,6 +37,14 @@ class _FakeClient(object):
 
     def screenshot(self, path):
         return ExecResult(ok=True, kind="ok", result=str(path))
+
+
+class _CollectionClient(_FakeClient):
+    """A fake client whose status reports *names* as the collection list."""
+
+    def __init__(self, names):
+        super(_CollectionClient, self).__init__()
+        self.collections = tuple(names)
 
 
 @pytest.fixture(autouse=True)
@@ -74,6 +88,41 @@ def test_status_json_shape(capsys):
     payload = json.loads(capsys.readouterr().out)
     assert payload["ok"] is True
     assert payload["status"]["scene"] == "Scene"
+
+
+def test_status_previews_collections_instead_of_wrapping(capsys, monkeypatch):
+    """Regression: dozens of collection names must not become one wall of text.
+
+    The first live run against a 45-collection production scene printed every
+    name on a single line, which is unreadable in a terminal and useless in a
+    screenshot. Show a count and a short preview; --json keeps the full list.
+    """
+    names = ["Collection_%02d" % index for index in range(45)]
+    monkeypatch.setattr(cli, "_client", lambda args: _CollectionClient(names))
+
+    assert run(["status"]) == cli.EXIT_OK
+    out = capsys.readouterr().out
+
+    assert "collections: 45" in out
+    assert "first:" in out
+    assert names[0] in out
+    # The preview is bounded, and the remainder is summarised rather than dumped.
+    assert names[cli.COLLECTION_PREVIEW] not in out
+    assert "... and %d more" % (len(names) - cli.COLLECTION_PREVIEW) in out
+
+
+def test_status_json_keeps_every_collection(capsys, monkeypatch):
+    names = ["Collection_%02d" % index for index in range(45)]
+    monkeypatch.setattr(cli, "_client", lambda args: _CollectionClient(names))
+
+    assert run(["status", "--json"]) == cli.EXIT_OK
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["status"]["collections"] == names
+
+
+def test_status_without_collections_omits_the_section(capsys):
+    assert run(["status"]) == cli.EXIT_OK
+    assert "collections:" not in capsys.readouterr().out
 
 
 def test_exec_prints_stdout_and_result(capsys):
