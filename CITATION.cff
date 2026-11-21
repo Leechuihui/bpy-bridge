@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use bpy-bridge in work you publish, cite it as below."
+title: "bpy-bridge"
+abstract: "Drive a running Blender from any process: thread-safe remote execution of Python, scene inspection and screenshots, with a token-authenticated loopback transport."
+type: software
+license: MIT
+version: 0.1.0
+date-released: "2026-11-21"
+authors:
+  - name: "bpy-bridge contributors"
+repository-code: "https://github.com/Leechuihui/bpy-bridge"
+url: "https://github.com/Leechuihui/bpy-bridge"
+keywords:
+  - blender
+  - bpy
+  - automation
+  - rpc
+  - python
+  - cli

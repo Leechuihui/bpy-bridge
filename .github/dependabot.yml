@@ -1,0 +1,32 @@
+version: 2
+
+# The runtime has zero dependencies, so there is no requirements file to watch.
+# What can still rot is the CI itself: action versions are pinned only by tag,
+# and a stale major is how a workflow quietly starts running on a deprecated
+# runtime (the Node 20 -> 24 warnings on this repo's first run were exactly
+# that). pip covers the dev extra used by the tests.
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "ci"
+    labels:
+      - "dependencies"
+      - "ci"
+
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "deps"
+    labels:
+      - "dependencies"
+    # The runtime is stdlib-only on purpose. A PR here is a change to the dev
+    # tooling, not to what users install, so keep it to one grouped bump.
+    groups:
+      dev-tooling:
+        patterns:
+          - "*"

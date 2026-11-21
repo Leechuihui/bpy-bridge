@@ -6,7 +6,22 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- `SECURITY.md` with the disclosure process, and `CODE_OF_CONDUCT.md`
+  (Contributor Covenant 2.1).
+- `.github/dependabot.yml` for the CI actions and dev tooling, and
+  `.editorconfig`.
+- `CITATION.cff`, so the project can be cited.
+- A star-history chart in both READMEs.
+
+### Fixed
+
+- The screenshot test hard-coded a Windows path and failed on Linux and macOS;
+  it now absolutizes the expectation the way the server does.
+- CI: a workflow step name containing `: ` broke YAML parsing, so no job ever
+  started. Python 3.8 also moved to a pinned `ubuntu-22.04`, because
+  `ubuntu-latest` (26.04) has no 3.8 in its toolcache.
 
 ## [0.1.0] — 2026-11-21
 

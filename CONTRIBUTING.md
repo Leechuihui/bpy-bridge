@@ -179,7 +179,10 @@ The most useful bug report includes:
 4. If it is a threading issue, whether the viewport was rendering at the time.
 
 For anything that looks like a security bypass, please use a private advisory
-rather than a public issue — see [docs/security.md](docs/security.md).
+rather than a public issue — see [SECURITY.md](SECURITY.md) for the process and
+the scope. The full threat model is in [docs/security.md](docs/security.md).
+
+By participating you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## License
 

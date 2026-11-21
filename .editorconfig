@@ -1,0 +1,22 @@
+# The line endings matter here for a real reason: `server.py` is copied into
+# Blender and exec()'d, and `tests/` compares file contents on three platforms.
+# Normalise in the working tree and let Git store LF.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{md,yml,yaml}]
+indent_size = 2
+
+# Makefiles need real tabs.
+[Makefile]
+indent_style = tab
+
+# .gitattributes stores LF for everything (`* text=auto eol=lf`), so the
+# working tree stays LF even for batch files. Don't claim CRLF here.

@@ -242,6 +242,10 @@ python tests/check_readme_links.py  # 语言切换链接 + 相对链接
 - **没有 Windows 服务模式。** 桥接服务的寿命和 Blender 一样长。
 - **`shot()` 需要 GUI。** 无头 Blender 没有窗口可截图。
 
+## Star 历史
+
+[![Star 历史曲线](https://api.star-history.com/svg?repos=Leechuihui/bpy-bridge&type=Date)](https://star-history.com/#Leechuihui/bpy-bridge&Date)
+
 ## 许可证
 
 MIT —— 见 [LICENSE](LICENSE)。

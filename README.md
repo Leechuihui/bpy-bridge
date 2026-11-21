@@ -252,6 +252,10 @@ Known limitations, stated plainly:
 - **No Windows service mode.** The bridge lives as long as Blender does.
 - **`shot()` needs a GUI.** Headless Blender has no window to screenshot.
 
+## Star history
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Leechuihui/bpy-bridge&type=Date)](https://star-history.com/#Leechuihui/bpy-bridge&Date)
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

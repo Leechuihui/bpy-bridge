@@ -64,6 +64,8 @@ LINKED_FILES = (
     "docs/install.zh-CN.md",
     "CONTRIBUTING.md",
     "CHANGELOG.md",
+    "SECURITY.md",
+    "CODE_OF_CONDUCT.md",
 )
 
 #: Matches `[label](target)` and `[![alt](img)](target)`, capturing the final
